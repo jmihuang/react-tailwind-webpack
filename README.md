@@ -1,172 +1,122 @@
-# React + Webpack 開發環境建立教學
-
-> 官方的 `npx create-react-app my-app` 現已改為使用 **Vite + Rollup**，不再倚賴 Webpack。  
-> 不過若你對 Webpack 打包流程更熟悉，仍可手動建立 React 專案。
-
+---
+title: react-tailwind-webpack
+date: 2025-06-04 19:35:35
+tags:
+  - React.js
+  - Webpack
+  - Tailwind CSS
+categories:
+  - 前端技術
 ---
 
-## 為什麼使用 Webpack？
+# React 引用 Tailwind CSS 使用 Webpack 打包工具
 
-使用 Webpack 的目的：
+如不清楚使用 React 安裝 Webpack 可以 [可先看這篇](https://jmihuang.github.io/blog/2025/05/31/React-with-webpack/)
 
-1. 安裝 Webpack 並自訂設定檔
-2. 使用 Babel 編譯 React 的 JSX 語法
-3. 打包 JS、HTML、CSS 等檔案
-4. 利用 dev server 啟用 hot reload
+## 1. 安裝必要套件
 
----
-
-## 建立 React + Webpack 專案
-
-### 1. 初始化專案
+!! 注意版本號的相依性，之前一直報錯就是在不同版本號不相支援
 
 ```bash
-mkdir react_with_webpack
-cd react_with_webpack
-npm init -y
+npm install -D tailwindcss@3.4.1 postcss@8.4.35 autoprefixer@10.4.19 style-loader css-loader postcss-loader
 ```
 
-使用 `-y` 可快速產生預設的 `package.json`。
+## 2. 新增 webpack 配置
 
----
-
-### 2. 安裝 Webpack 與開發用套件
-
-```bash
-npm install --save-dev webpack webpack-cli webpack-dev-server
-```
-
-安裝後 `package.json` 會出現：
-
-```json
-"devDependencies": {
-  "webpack": "^5.x.x",
-  "webpack-cli": "^x.x.x",
-  "webpack-dev-server": "^x.x.x"
-}
-```
-
-> 「^」代表安裝相容的最新版，但實務上會用固定版本避免相容問題，版本會鎖在 `package-lock.json`。
-
----
-
-### 3. 安裝 Babel + HTML 套件
-
-```bash
-npm install --save-dev babel-loader @babel/core @babel/preset-env @babel/preset-react
-npm install --save-dev html-webpack-plugin
-```
-
----
-
-### 4. 建立 Webpack 設定檔 `webpack.config.js`
+在 `webpack.config.js` 中添加 CSS 處理規則：
 
 ```js
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-
 module.exports = {
-  entry: "./src/index.jsx",
-  output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "bundle.js",
-    clean: true,
-  },
-  mode: "development",
+  // ... 其他配置
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: "babel-loader",
-        },
+        test: /\.css$/i,
+        include: path.resolve(__dirname, "src"),
+        use: ["style-loader", "css-loader", "postcss-loader"],
       },
     ],
-  },
-  resolve: {
-    extensions: [".js", ".jsx"],
-  },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: "./public/index.html",
-    }),
-  ],
-  devServer: {
-    static: {
-      directory: path.join(__dirname, "dist"),
-    },
-    compress: true,
-    port: 3000,
-    hot: true,
   },
 };
 ```
 
----
+## 3. 配置 PostCSS
 
-### 5. 建立 Babel 設定檔 `.babelrc`
+在專案根目錄新增 `postcss.config.js`：
 
-```json
-{
-  "presets": ["@babel/preset-env", "@babel/preset-react"]
-}
+```js
+module.exports = {
+  plugins: [require("tailwindcss"), require("autoprefixer")],
+};
 ```
 
----
+## 4. 配置 Tailwind
 
-### 6. 加入啟動指令到 `package.json`
+在專案根目錄新增 `tailwind.config.js`：
 
-```json
-"scripts": {
-  "start": "webpack serve --open --mode development",
-  "build": "webpack --mode production"
-}
+```js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
 ```
 
----
+## 5. 新增 Tailwind 指令
 
-## 專案目錄結構
+在 `src/style.css` 中添加 Tailwind 指令：
 
-```
-react_with_webpack/
-├── public/
-│   └── index.html
-├── src/
-│   └── index.jsx
-├── .babelrc
-├── package.json
-├── webpack.config.js
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 ```
 
----
+## 6. 引入樣式
 
-## HTML 範本 `public/index.html`
-
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>React App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <!-- ✅ React 掛載點 -->
-  </body>
-</html>
-```
-
----
-
-## React 程式碼 `src/index.jsx`
+在 `src/index.jsx` 中引入樣式文件：
 
 ```jsx
-import React from "react";
-import { createRoot } from "react-dom/client";
-
-const App = () => <h1>Hello React with Webpack!</h1>;
-
-const root = createRoot(document.getElementById("root"));
-root.render(<App />);
+import "./style.css";
 ```
+
+## 7. 清除快取並重新啟動
+
+```bash
+rm -rf dist && npm run start
+```
+
+## 注意事項
+
+1. 確保 `package.json` 中有正確的 scripts：
+
+   ```json
+   {
+     "scripts": {
+       "start": "webpack serve --mode development",
+       "build": "webpack --mode production"
+     }
+   }
+   ```
+
+2. 如果遇到樣式不生效的問題，可以：
+
+   - 檢查 `tailwind.config.js` 中的 `content` 配置是否正確
+   - 確認 `postcss.config.js` 中的插件配置是否正確
+   - 清除 `dist` 目錄並重新啟動開發伺服器
+
+   ```
+    rm -rf dist && npm run start
+   ```
+
+3. 如果遇到端口被占用的問題（EADDRINUSE），可以：
+   - 在 `webpack.config.js` 中修改 `devServer` 的端口：
+     ```js
+     devServer: {
+       port: 3000, // 或其他未被使用的端口
+     }
+     ```
+   - 或者先關閉占用端口的程序
