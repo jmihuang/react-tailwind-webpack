@@ -1,14 +1,3 @@
----
-title: react-tailwind-webpack
-date: 2025-06-04 19:35:35
-tags:
-  - React.js
-  - Webpack
-  - Tailwind CSS
-categories:
-  - 前端技術
----
-
 # React 引用 Tailwind CSS 使用 Webpack 打包工具
 
 github [載點](https://github.com/jmihuang/react-tailwind-webpack)
