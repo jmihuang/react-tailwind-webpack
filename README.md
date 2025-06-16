@@ -11,6 +11,8 @@ categories:
 
 # React 引用 Tailwind CSS 使用 Webpack 打包工具
 
+github [載點](https://github.com/jmihuang/react-tailwind-webpack)
+
 如不清楚使用 React 安裝 Webpack 可以 [可先看這篇](https://jmihuang.github.io/blog/2025/05/31/React-with-webpack/)
 
 ## 1. 安裝必要套件
